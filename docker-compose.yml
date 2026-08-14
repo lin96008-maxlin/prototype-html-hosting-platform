@@ -1,4 +1,4 @@
-name: prototype-hosting-platform-demo
+name: prototype-html-hosting-platform
 
 x-logging: &default-logging
   driver: json-file

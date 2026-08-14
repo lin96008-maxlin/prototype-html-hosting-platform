@@ -1,6 +1,6 @@
-# 原型托管平台demo
+# 原型html托管平台
 
-[![持续集成检查](https://github.com/lin96008-maxlin/prototype-hosting-platform-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/lin96008-maxlin/prototype-hosting-platform-demo/actions/workflows/ci.yml)
+[![持续集成检查](https://github.com/lin96008-maxlin/prototype-html-hosting-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/lin96008-maxlin/prototype-html-hosting-platform/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-16a34a.svg)](./LICENSE)
 [![Next.js 16](https://img.shields.io/badge/Next.js-16-111827.svg)](https://nextjs.org/)
 [![React 19](https://img.shields.io/badge/React-19-087ea4.svg)](https://react.dev/)
@@ -9,7 +9,7 @@
 
 在 Vibe Coding（自然语言协同编程）时代，产品经理会快速产出大量 HTML 原型、AI 生成页面和可交互演示；传统工作中也仍有大量 Axure 导出的 HTML 文件夹。文件如果长期散落在本地、网盘和聊天记录中，版本、访问入口、权限和复用价值都会迅速失控。
 
-原型托管平台demo把这些文件产物转化为可持续管理的团队资产：统一上传、自动生成首页预览图、在线访问、版本更新、链接分享、访问密码、团队内公开共享、公开广场和使用数据统计。
+原型html托管平台把这些文件产物转化为可持续管理的团队资产：统一上传、自动生成首页预览图、在线访问、版本更新、链接分享、访问密码、团队内公开共享、公开广场和使用数据统计。
 
 ![登录与产品定位](./docs/images/01-login.png)
 
@@ -113,6 +113,20 @@ HTML 原型内容**不写入数据库字段**。PostgreSQL 只保存账号、权
 
 Restic 负责本机 PostgreSQL 日常备份；原型文件和预览图建议使用阿里云云备份、云硬盘快照或其他云厂商文件备份服务做异地保护。云备份需要在对应云厂商控制台单独开通，本仓库不会自动创建或绑定任何云账号资源。
 
+## 目录结构
+
+| 路径 | 用途 |
+| --- | --- |
+| `src/` | 页面、组件、服务端 API 和核心业务逻辑 |
+| `database/` | PostgreSQL 数据库迁移脚本 |
+| `docker/`、`scripts/` | 应用启动、数据库初始化和 Restic 备份脚本 |
+| `tests/` | Playwright 端到端测试及测试素材 |
+| `docs/` | 部署、备份说明和功能截图 |
+| `.github/workflows/ci.yml` | GitHub 持续集成检查 |
+| 根目录配置文件 | Next.js、TypeScript、ESLint、Docker Compose 和环境变量模板 |
+
+仓库不包含 `node_modules`、构建产物、数据库文件、上传内容或任何真实环境密钥。
+
 ## 本地体验
 
 环境要求：Node.js 22、npm。
@@ -160,7 +174,7 @@ npm run build
 npm run test:e2e
 ```
 
-GitHub Actions 会在推送和 Pull Request 时自动执行代码规范、类型、单元测试和生产构建检查。部署工作流默认仅支持手动触发，并要求使用新环境独立配置的 GitHub Environment、变量和密钥。
+GitHub Actions 会在推送和 Pull Request 时自动执行代码规范、类型、单元测试和生产构建检查。服务器部署由使用者根据自己的域名、网络和密钥环境独立配置。
 
 ## 安全说明
 

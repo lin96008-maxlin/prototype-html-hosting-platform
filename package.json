@@ -1,5 +1,5 @@
 {
-  "name": "prototype-hosting-platform-demo",
+  "name": "prototype-html-hosting-platform",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,8 +11,6 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:production-smoke": "node scripts/production-smoke.mjs",
-    "test:docker-smoke": "node scripts/docker-smoke.mjs",
     "dev:e2e": "node scripts/e2e-server.mjs",
     "migrate": "node scripts/migrate.mjs",
     "bootstrap": "node scripts/bootstrap.mjs"

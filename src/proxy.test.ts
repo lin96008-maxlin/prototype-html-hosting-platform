@@ -1,6 +1,6 @@
 import { unstable_doesMiddlewareMatch } from "next/experimental/testing/server";
 import { describe, expect, it } from "vitest";
-import { config } from "../proxy";
+import { config } from "./proxy";
 
 describe("proxy matcher", () => {
   it.each([

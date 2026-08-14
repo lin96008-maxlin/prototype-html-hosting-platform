@@ -119,11 +119,13 @@ Restic 负责本机 PostgreSQL 日常备份；原型文件和预览图建议使�
 | --- | --- |
 | `src/` | 页面、组件、服务端 API 和核心业务逻辑 |
 | `database/` | PostgreSQL 数据库迁移脚本 |
-| `docker/`、`scripts/` | 应用启动、数据库初始化和 Restic 备份脚本 |
+| `deploy/` | Dockerfile、Docker Compose 与 Caddy 部署配置 |
+| `config/` | ESLint、Vitest 与 Playwright 工具配置 |
+| `docker/`、`scripts/` | 容器启动、数据库初始化和 Restic 备份脚本 |
 | `tests/` | Playwright 端到端测试及测试素材 |
 | `docs/` | 部署、备份说明和功能截图 |
-| `.github/workflows/ci.yml` | GitHub 持续集成检查 |
-| 根目录配置文件 | Next.js、TypeScript、ESLint、Docker Compose 和环境变量模板 |
+| `.github/` | 持续集成、贡献指南和安全说明 |
+| 根目录配置文件 | Next.js、TypeScript、npm 和环境变量模板 |
 
 仓库不包含 `node_modules`、构建产物、数据库文件、上传内容或任何真实环境密钥。
 
@@ -153,7 +155,7 @@ npm run dev
 4. 启动应用、数据库、网关和备份服务：
 
 ```bash
-docker compose --profile standalone-proxy up -d --build
+docker compose -f deploy/compose.yml --profile standalone-proxy up -d --build
 ```
 
 默认站点前缀为 `/manage`：
@@ -182,11 +184,11 @@ GitHub Actions 会在推送和 Pull Request 时自动执行代码规范、类型
 - 生产环境必须使用独立随机密码，不要使用 README 中的演示账号密码。
 - 分享密码在数据库中采用加密字段保存，登录密码采用不可逆哈希保存。
 - 建议定期执行 Restic 隔离恢复验证，而不仅仅检查“备份任务成功”。
-- 安全问题请按 [SECURITY.md](./SECURITY.md) 私下报告。
+- 安全问题请按 [安全说明](./.github/SECURITY.md) 私下报告。
 
 ## 参与贡献
 
-欢迎产品经理、设计师和开发者通过 Issue 提交使用场景、功能建议和问题反馈。提交代码前请阅读 [CONTRIBUTING.md](./CONTRIBUTING.md)。
+欢迎产品经理、设计师和开发者通过 Issue 提交使用场景、功能建议和问题反馈。提交代码前请阅读 [贡献指南](./.github/CONTRIBUTING.md)。
 
 ## 开源许可
 

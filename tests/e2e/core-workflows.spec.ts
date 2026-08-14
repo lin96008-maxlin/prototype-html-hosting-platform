@@ -154,6 +154,31 @@ test("卡片操作根据卡片宽度在图标文字和纯图标之间自适应",
   }
 });
 
+test("减少动态效果时预览生成图标仍提供缓慢反馈", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await login(page);
+  await page.evaluate(() => {
+    const loading = document.createElement("span");
+    loading.className = "preview-loading";
+    loading.dataset.testid = "preview-loading-animation";
+    loading.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.2-8.56" /></svg>';
+    document.body.appendChild(loading);
+  });
+
+  const loading = page.getByTestId("preview-loading-animation");
+  const icon = loading.locator("svg");
+  await expect(icon).toHaveCSS("animation-name", "preview-spin");
+  await expect(icon).toHaveCSS("animation-duration", "2.4s");
+  await expect(icon).toHaveCSS("animation-iteration-count", "infinite");
+  const initialTransform = await icon.evaluate((element) => getComputedStyle(element).transform);
+  await page.waitForTimeout(350);
+  const nextTransform = await icon.evaluate((element) => getComputedStyle(element).transform);
+  expect(nextTransform).not.toBe(initialTransform);
+
+  await loading.evaluate((element) => element.classList.add("is-failed"));
+  await expect(icon).toHaveCSS("animation-name", "none");
+});
+
 test("各业务页面标题字号和标题区分隔线保持一致", async ({ page }) => {
   await login(page);
   const pages = [

@@ -1647,6 +1647,7 @@ button {
 .preview-loading svg,
 .preview-spinner {
   animation: preview-spin 0.9s linear infinite;
+  transform-origin: center;
 }
 
 .preview-loading.is-failed {
@@ -5197,5 +5198,11 @@ button {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /* 加载反馈属于功能性动画，减少动态效果时降速而非停用。 */
+  .preview-loading:not(.is-failed) svg,
+  .preview-spinner {
+    animation: preview-spin 2.4s steps(8, end) infinite !important;
   }
 }

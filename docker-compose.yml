@@ -1,0 +1,139 @@
+name: prototype-hosting-platform-demo
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  postgres:
+    image: public.ecr.aws/docker/library/postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-prototype_demo}
+      POSTGRES_USER: ${POSTGRES_USER:-prototype_demo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: Asia/Shanghai
+    command:
+      - postgres
+      - -c
+      - max_connections=30
+      - -c
+      - shared_buffers=128MB
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-prototype_demo} -d ${POSTGRES_DB:-prototype_demo}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    logging: *default-logging
+
+  app:
+    init: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH:-/manage}
+    restart: unless-stopped
+    stop_grace_period: 30s
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-prototype_demo}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-prototype_demo}
+      DATABASE_POOL_MAX: 5
+      DATA_DIR: /data/prototype-hub
+      NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH:-/manage}
+      MANAGE_URL: https://${SITE_DOMAIN:-prototype-demo.example.com}${NEXT_PUBLIC_BASE_PATH:-/manage}
+      DEMO_URL: https://${SITE_DOMAIN:-prototype-demo.example.com}${NEXT_PUBLIC_BASE_PATH:-/manage}
+      AUTH_COOKIE_DOMAIN: .${ROOT_DOMAIN:-example.com}
+      SESSION_SIGNING_SECRET: ${SESSION_SIGNING_SECRET}
+      SHARE_PASSWORD_ENCRYPTION_KEY: ${SHARE_PASSWORD_ENCRYPTION_KEY}
+      CHROMIUM_EXECUTABLE_PATH: /usr/bin/chromium
+      STORAGE_RESERVE_RATIO: ${STORAGE_RESERVE_RATIO:-0.2}
+      BACKUP_STATUS_DIR: /backup-status
+      BOOTSTRAP_SUPER_ADMIN_ACCOUNT: ${BOOTSTRAP_SUPER_ADMIN_ACCOUNT:-admin}
+      BOOTSTRAP_SUPER_ADMIN_PASSWORD: ${BOOTSTRAP_SUPER_ADMIN_PASSWORD}
+      BOOTSTRAP_SUPER_ADMIN_NAME: ${BOOTSTRAP_SUPER_ADMIN_NAME:-系统管理员}
+      BOOTSTRAP_DEPARTMENT_NAME: ${BOOTSTRAP_DEPARTMENT_NAME:-产品中心}
+      DEMO_MODE: "false"
+      TZ: Asia/Shanghai
+    volumes:
+      - prototype_data:/data/prototype-hub
+      - backup_status:/backup-status:ro
+    ports:
+      - "127.0.0.1:${APP_HOST_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/manage/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    logging: *default-logging
+
+  caddy:
+    image: public.ecr.aws/docker/library/caddy:2.8-alpine
+    profiles: ["standalone-proxy"]
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-prototype-demo.example.com}
+      NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH:-/manage}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    logging: *default-logging
+
+  backup:
+    build:
+      context: .
+      dockerfile: docker/backup.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER:-prototype_demo}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB:-prototype_demo}
+      RESTIC_REPOSITORY: /repository
+      RESTIC_PASSWORD: ${BACKUP_REPOSITORY_PASSWORD}
+      BACKUP_HOSTNAME: ${BACKUP_HOSTNAME:-prototype-demo}
+      BACKUP_STATUS_DIR: /status
+      BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-86400}
+      BACKUP_RETRY_SECONDS: ${BACKUP_RETRY_SECONDS:-300}
+      BACKUP_MAX_AGE_SECONDS: ${BACKUP_MAX_AGE_SECONDS:-93600}
+      BACKUP_LOCK_TIMEOUT_SECONDS: ${BACKUP_LOCK_TIMEOUT_SECONDS:-600}
+      TZ: Asia/Shanghai
+    volumes:
+      - prototype_data:/data:ro
+      - backup_data:/repository
+      - backup_staging:/staging
+      - backup_status:/status
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/backup-healthcheck.sh"]
+      interval: 5m
+      timeout: 30s
+      retries: 3
+      start_period: 15m
+    logging: *default-logging
+
+volumes:
+  postgres_data:
+  prototype_data:
+  backup_data:
+  backup_staging:
+  backup_status:
+  caddy_data:
+  caddy_config:

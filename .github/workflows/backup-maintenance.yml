@@ -1,0 +1,56 @@
+name: 手动备份巡检
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 选择只读检查或隔离恢复验证
+        required: true
+        default: check
+        type: choice
+        options:
+          - check
+          - verify
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prototype-hosting-platform-demo-backup
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    name: 检查新演示环境备份
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: demo
+    steps:
+      - name: 配置新环境连接
+        shell: bash
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          : "${DEPLOY_SSH_KEY:?缺少新环境 DEPLOY_SSH_KEY}"
+          : "${DEPLOY_KNOWN_HOSTS:?缺少新环境 DEPLOY_KNOWN_HOSTS}"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+
+      - name: 执行备份维护
+        shell: bash
+        env:
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ vars.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+          MAINTENANCE_ACTION: ${{ inputs.action }}
+        run: |
+          set -euo pipefail
+          : "${DEPLOY_HOST:?缺少新环境 DEPLOY_HOST}"
+          : "${DEPLOY_PORT:?缺少新环境 DEPLOY_PORT}"
+          : "${DEPLOY_USER:?缺少新环境 DEPLOY_USER}"
+          ssh -p "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST" \
+            "sudo /usr/local/sbin/prototype-hub-backup-maintenance '$MAINTENANCE_ACTION'"

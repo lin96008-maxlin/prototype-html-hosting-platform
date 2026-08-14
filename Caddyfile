@@ -1,0 +1,20 @@
+(common) {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}
+
+{$SITE_DOMAIN:prototype-demo.example.com} {
+	import common
+	@manage_paths path /manage /manage/*
+	handle @manage_paths {
+		reverse_proxy app:3000
+	}
+	handle {
+		respond "Not Found" 404
+	}
+}

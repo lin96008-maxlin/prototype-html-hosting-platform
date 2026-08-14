@@ -1,0 +1,10 @@
+services:
+  app:
+    networks:
+      - default
+      - edge
+
+networks:
+  edge:
+    name: prototype-demo-edge
+    external: true

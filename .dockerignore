@@ -1,0 +1,17 @@
+node_modules
+.next*
+.data
+.env
+.env.*
+!.env.example
+npm-debug.log*
+supabase
+test-results
+playwright-report
+coverage
+*.tsbuildinfo
+.git
+.github
+.next-cli
+.playwright-cli
+output

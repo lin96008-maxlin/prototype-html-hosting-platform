@@ -1,0 +1,54 @@
+{
+  "name": "prototype-hosting-platform-demo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:production-smoke": "node scripts/production-smoke.mjs",
+    "test:docker-smoke": "node scripts/docker-smoke.mjs",
+    "dev:e2e": "node scripts/e2e-server.mjs",
+    "migrate": "node scripts/migrate.mjs",
+    "bootstrap": "node scripts/bootstrap.mjs"
+  },
+  "dependencies": {
+    "@next/env": "16.3.0",
+    "bcryptjs": "^3.0.2",
+    "date-fns": "^4.1.0",
+    "jose": "^6.1.0",
+    "jszip": "^3.10.1",
+    "lucide-react": "^0.468.0",
+    "nanoid": "^5.1.6",
+    "next": "16.3.0",
+    "node-unrar-js": "^2.0.2",
+    "pg": "^8.16.3",
+    "puppeteer-core": "^25.5.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.15.30",
+    "@types/pg": "^8.15.5",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5",
+    "eslint": "^9.28.0",
+    "eslint-config-next": "16.3.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "overrides": {
+    "postcss": {
+      "nanoid": "3.3.18"
+    }
+  }
+}

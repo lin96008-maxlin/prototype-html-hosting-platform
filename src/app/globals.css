@@ -5203,6 +5203,6 @@ button {
   /* 加载反馈属于功能性动画，减少动态效果时降速而非停用。 */
   .preview-loading:not(.is-failed) svg,
   .preview-spinner {
-    animation: preview-spin 2.4s steps(8, end) infinite !important;
+    animation: preview-spin 2.4s linear infinite !important;
   }
 }

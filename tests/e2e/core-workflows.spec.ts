@@ -169,6 +169,7 @@ test("减少动态效果时预览生成图标仍提供缓慢反馈", async ({ pa
   const icon = loading.locator("svg");
   await expect(icon).toHaveCSS("animation-name", "preview-spin");
   await expect(icon).toHaveCSS("animation-duration", "2.4s");
+  await expect(icon).toHaveCSS("animation-timing-function", "linear");
   await expect(icon).toHaveCSS("animation-iteration-count", "infinite");
   const initialTransform = await icon.evaluate((element) => getComputedStyle(element).transform);
   await page.waitForTimeout(350);
